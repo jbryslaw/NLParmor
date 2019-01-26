@@ -327,6 +327,7 @@ def lex_func(this_function):
         try:
             l_tokens.extend([cpp_dict[this_char]])
             l_names.extend([this_char])
+            l_literals.extend([this_char])
             print("found ",this_char)
         except:
             print("\"",this_char,"\" not in dictionary")
