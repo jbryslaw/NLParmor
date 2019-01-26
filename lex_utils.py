@@ -25,6 +25,7 @@ def lex_func(this_function):
                 "->":21, # encodes ->
                 ".":22,
                 "*":23,
+                "=":30,
                 "void":24,
                 "return":25,
                 "NULL":26,
@@ -32,7 +33,7 @@ def lex_func(this_function):
                 "char":27,
                 "double":28,
                 "float":29,
-                "=":30,
+
 
                 # var identifiers ( my_int )
                 "var0":50,
@@ -199,17 +200,6 @@ def lex_func(this_function):
                     pass
             continue;
 
-        # if this_char == "\'":
-        #     i_char += 1
-        #     if i_char >= len(this_function): break
-        #     this_char = this_function[i_char]        
-        #     while (this_char != "\'"):
-        #         i_char += 1
-        #         if i_char >= len(this_function): break
-        #         this_char = this_function[i_char]
-        #     print("strg%d" % n_strings)
-        #     n_strings += 1
-        #     continue;
         # END deal with strings
         ##############################
         
@@ -259,7 +249,13 @@ def lex_func(this_function):
 
         ##############################
         # check for numbers
-        if this_char.isdigit() or this_char == '.':
+        #make sure its not just a dot
+        b_justdot = False
+        if this_char == '.':
+            if i_char >= len(this_function): break
+            if not this_function[i_char+1].isdigit(): b_justdot = True
+        
+        if ( not b_justdot ) and (this_char.isdigit() or this_char == '.'):
             nstring = this_char
             i_char += 1
             if i_char >= len(this_function): break
@@ -299,8 +295,6 @@ def lex_func(this_function):
         # check for numbers
         ##############################
 
-        # ############# Tokenize numbers
-
         ##############################
         # check for arrows
         if (i_char+1) < len(this_function):
@@ -310,6 +304,7 @@ def lex_func(this_function):
                 this_char = this_function[i_char]
                 l_tokens.extend([cpp_dict["->"]])
                 l_names.extend(["->"])
+                l_literals.extend(["->"])
                 i_char-=1
                 continue;
         # END check for arrows
@@ -322,8 +317,6 @@ def lex_func(this_function):
 
         ##############################
         ######## Tokenize special characters
-        # if this_char == "]":        
-        #     l_tokens.extend([cpp_dict[this_char]])
         try:
             l_tokens.extend([cpp_dict[this_char]])
             l_names.extend([this_char])
