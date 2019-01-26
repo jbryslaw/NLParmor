@@ -22,7 +22,7 @@ def lex_func(this_function):
                 ";":18,
                 "~":19,
                 "!":20,
-                "arrow":21, # encodes ->
+                "->":21, # encodes ->
                 ".":22,
                 "*":23,
                 "void":24,
@@ -54,6 +54,8 @@ def lex_func(this_function):
 
     n_vars = 0
     d_vars = dict()
+
+    this_function+= ' '
     while i_char < (len(this_function)-1):
         i_char +=1
         if i_char >= len(this_function): break
@@ -177,9 +179,8 @@ def lex_func(this_function):
                 i_char+=2
                 if i_char >= len(this_function): break
                 this_char = this_function[i_char]
-                l_tokens.extend([cpp_dict["arrow"]])
+                l_tokens.extend([cpp_dict["->"]])
                 l_names.extend(["->"])
-                print("found arrow skipping to character: ", i_char," ",this_char)
                 i_char-=1
                 continue;
         # END check for arrows
