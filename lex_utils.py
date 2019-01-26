@@ -60,71 +60,201 @@ def lex_func(this_function):
                 "&=":51,
                 "|=":52,
                 "^=":53,
-                
-                
-                
+                "%=":54,
+                ".*":55,
+                "*=":56,
+                "##":57,
+                "<:":58,
+                ":>":59,
+                "<%":60,
+                "%>":61,
+                "%:":62,
+                                
 
                 #trigraphs
+                "<<=":63,
+                ">>=":64,
+                "??>":65,
+                "??<":66,
+                "??(":67,
+                "??(":68,
+                "??=":69,
+                "??/":70,
+                "??'":71,
+                "??!":72,
+                "??-":73,
 
+                
                 #keywords                
-                "void":24,
-                "return":25,
-                "NULL":26,
-                "int":27,
-                "char":27,
-                "double":28,
-                "float":29,
+                "alignas":74,
+                "alignof":75,
+                "and":76,
+                "and_eq":77,
+                "asm":78,
+                "atomic_cancel":79,
+                "atomic_commit":80,
+                "atomic_noexcept":81,
+                "auto":82,
+                "bitand":83,
+                "bitor":84,
+                "bool":85,
+                "break":86,
+                "case":87,
+                "catch":88,
+                "char":89,
+                "char8_t":90,
+                "char16_t":91,
+                "char32_t":92,
+                "class":93,
+                "compl":94,
+                "concept":95,
+                "const":96,
+                "consteval":97,
+                "constexpr":98,
+                "const_cast":99,
+                "continue":100,
+                "co_await":101,
+                "co_return":102,
+                "co_yield":103,
+                "decltype":104,
+                "default":105,
+                "delete":106,
+                "do":107,
+                "double":108,
+                "dynamic_cast":109,
+                "else":110,
+                "enum":111,
+                "explicit":112,
+                "export":113,
+                "extern":114,
+                "false":115,
+                "float":116,
+                "for":117,
+                "friend":118,
+                "goto":119,
+                "if":120,
+                "import":121,
+                "inline":122,
+                "int":123,
+                "long":124,
+                "module":125,
+                "mutable":126,
+                "namespace":127,
+                "new":128,
+                "noexcept":129,
+                "not":130,
+                "not_eq":131,
+                "nullptr":132,
+                "operator":133,
+                "or":134,
+                "or_eq":135,
+                "private":136,
+                "protected":137,
+                "public":138,
+                "reflexpr":139,
+                "register":140,
+                "reinterpret_cast":141,
+                "requires":142,
+                "return":143,
+                "short":144,
+                "signed":145,
+                "sizeof":146,
+                "static":147,
+                "static_assert":148,
+                "static_cast":149,
+                "struct":150,
+                "switch":151,
+                "synchronized":152,
+                "template":153,
+                "this":154,
+                "thread_local":155,
+                "throw":156,
+                "true":157,
+                "try":158,
+                "typedef":159,
+                "typeid":160,
+                "typename":161,
+                "union":162,
+                "unsigned":163,
+                "using":164,
+                "virtual":165,
+                "void":166,
+                "volatile":167,
+                "wchar_t":168,
+                "while":169,
+                "xor":170,
+                "xor_eq":171,
+                "override":172,
+                "final":173,
+                "audit":174,
+                "axiom":175,
+                "transaction_safe":176,
+                "transaction_safe_dynamic":177,
 
+                "if":178,
+                "elif":179,
+                "else":180,
+                "endif":181,
+                "ifdef":182,
+                "ifndef":183,
+                "define":184,
+                "undef":185,
+                "include":186,
+                "line":187,
+                "error":188,
+                "pragma":189,
+                "defined":190,
+                "__has_include":191,
+                "__has_cpp_attribute":192,
+                "_Pragma":193,
 
                 # var identifiers ( my_int )
-                "var0":50,
-                "var1":51,
-                "var2":52,
-                "var3":53,
-                "var4":54,
-                "var5":55,
-                "var6":56,
-                "var7":57,
-                "var8":58,
-                "var9":59,
+                "var0":194,
+                "var1":195,
+                "var2":196,
+                "var3":197,
+                "var4":198,
+                "var5":199,
+                "var6":200,
+                "var7":201,
+                "var8":202,
+                "var9":203,
 
                 # string literals ( "/home/" )
-                "str0":60,
-                "str1":61,
-                "str2":62,
-                "str3":63,
-                "str4":64,
-                "str5":65,
-                "str6":66,
-                "str7":67,
-                "str8":68,
-                "str9":69,
+                "str0":204,
+                "str1":205,
+                "str2":206,
+                "str3":207,
+                "str4":208,
+                "str5":209,
+                "str6":210,
+                "str7":211,
+                "str8":212,
+                "str9":213,
 
                 # char literals ( 'a' )
-                "char0":70,
-                "char1":71,
-                "char2":72,
-                "char3":73,
-                "char4":74,
-                "char5":75,
-                "char6":76,
-                "char7":77,
-                "char8":78,
-                "char9":79,
+                "char0":214,
+                "char1":215,
+                "char2":216,
+                "char3":217,
+                "char4":218,
+                "char5":219,
+                "char6":220,
+                "char7":221,
+                "char8":222,
+                "char9":223,
 
                 #float literals (123.235)
-                "float0":80,
-                "float1":81,
-                "float2":82,
-                "float3":83,
-                "float4":84,
-                "float5":85,
-                "float6":86,
-                "float7":87,
-                "float8":88,
-                "float9":89
-
-
+                "float0":224,
+                "float1":225,
+                "float2":226,
+                "float3":227,
+                "float4":228,
+                "float5":229,
+                "float6":230,
+                "float7":231,
+                "float8":232,
+                "float9":233,
                 }
 
     #comments:
@@ -181,6 +311,24 @@ def lex_func(this_function):
                 pass
         # END clear comments
         ##############################
+
+        ##############################
+        # check for digraphs
+        #if this and next char are dict ...
+        # END check for digraphs
+        ##############################
+        if (i_char+1) < len(this_function):
+            try:
+                l_tokens.extend([cpp_dict[atemp]])
+            except:
+                pass
+
+        ##############################
+        # check for trigraphs
+        #if this and next char and next are dict ...
+        # END check for trigraphs
+        ##############################
+
         
         ##############################
         #deal with strings
@@ -336,17 +484,6 @@ def lex_func(this_function):
         # check for numbers
         ##############################
 
-        ##############################
-        # check for digraphs
-        #if this and next char are dict ...
-        # END check for digraphs
-        ##############################
-
-        ##############################
-        # check for trigraphs
-        #if this and next char and next are dict ...
-        # END check for trigraphs
-        ##############################
 
         ##############################
         # check for arrows
