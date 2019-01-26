@@ -29,6 +29,7 @@ def lex_func(this_function):
                 "return":25,
                 "NULL":26,
                 "int":27,
+                "char":27,
                 "double":28,
                 "float":29,
                 "=":30,
@@ -200,7 +201,7 @@ def lex_func(this_function):
                     n_vars += 1                    
                     # Add token if var num is in list
                     try:
-                        l_tokens.extend([cpp_dict[astring]])
+                        l_tokens.extend([cpp_dict[atemp]])
                     except:
                         pass
 
@@ -228,8 +229,19 @@ def lex_func(this_function):
             # check if number is a float or int
             #float:
             if '.' in nstring:
-                l_names.extend([nstring])
                 l_literals.extend([nstring])
+
+                #check if this float has been used:
+                if not (nstring in d_floats):
+                    d_floats[nstring] = n_float
+                    atemp = ("float%d" % n_float)
+                    l_names.extend([atemp])
+                    n_float+=1
+                    # add token if var num is in list
+                    try:
+                        l_tokens.extend([cpp_dict[atemp]])
+                    except:
+                        pass
             #int:
             else:
                 for subchar in nstring:
@@ -288,7 +300,6 @@ def lex_func(this_function):
 
     # return a list with the tokens and their identifiers
 
-    print("keys: ",d_vars.keys())
     return [l_tokens,l_names,l_literals,
-            n_strings,n_int,n_float]
+            n_strings+1,n_int+1,n_float+1]
 #def lex_func(this_function):
