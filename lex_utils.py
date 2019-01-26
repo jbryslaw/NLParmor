@@ -31,7 +31,38 @@ def lex_func(this_function):
                 "int":27,
                 "double":28,
                 "float":29,
-                "=":30
+                "=":30,
+                "var0":50,
+                "var1":51,
+                "var2":52,
+                "var3":53,
+                "var4":54,
+                "var5":55,
+                "var6":56,
+                "var7":57,
+                "var8":58,
+                "var9":59,
+                "str0":60,
+                "str1":61,
+                "str2":62,
+                "str3":63,
+                "str4":64,
+                "str5":65,
+                "str6":66,
+                "str7":67,
+                "str8":68,
+                "str9":69,
+                "char0":70,
+                "char1":71,
+                "char2":72,
+                "char3":73,
+                "char4":74,
+                "char5":75,
+                "char6":76,
+                "char7":77,
+                "char8":78,
+                "char9":79
+
                 }
 
     #comments:
@@ -49,9 +80,10 @@ def lex_func(this_function):
     n_int     = 0
     n_float   = 0
 
-    l_tokens = []
-    l_names  = []
-
+    l_tokens   = []
+    l_names    = []
+    l_literals = []
+    
     n_vars = 0
     d_vars = dict()
 
@@ -132,15 +164,23 @@ def lex_func(this_function):
             try:
                 l_tokens.extend([cpp_dict[astring]])
                 l_names.extend([astring])
+                l_literals.extend([astring])
                 print("found ",this_char)
+
+            #not a keyword:
             except:
+                # check if this variable name has been used before
                 if not (astring in d_vars):
                     d_vars[astring] = n_vars
-                    astring = ("var%d" % n_vars)                    
-                    l_names.extend([astring])
-                    print("this: ",astring)
-                    n_vars += 1
-                    ### need to add toke code 
+                    l_literals.extend([astring])
+                    atemp = ("var%d" % n_vars)                    
+                    l_names.extend([atemp])
+                    n_vars += 1                    
+                    # Add token if var num is in list
+                    try:
+                        l_tokens.extend([cpp_dict[astring]])
+                    except:
+                        pass
 
             i_char-=1
             continue;
@@ -162,8 +202,13 @@ def lex_func(this_function):
                 i_char += 1
                 if i_char >= len(this_function): break
                 this_char = this_function[i_char]
+
+                
             print(nstring)
+            
+            
             l_names.extend([nstring])
+            l_literals.extend([nstring])
             
             i_char-=1
             continue;
@@ -218,5 +263,6 @@ def lex_func(this_function):
     # return a list with the tokens and their identifiers
 
     print("keys: ",d_vars.keys())
-    return [l_tokens,l_names,n_strings,n_int,n_float]
+    return [l_tokens,l_names,l_literals,
+            n_strings,n_int,n_float]
 #def lex_func(this_function):
