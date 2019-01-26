@@ -141,7 +141,7 @@ def lex_func(this_function):
         
         ##############################
         #deal with strings
-        if this_char == "\"":
+        if this_char == "\"":            
             i_char += 1
             if i_char >= len(this_function): break
             this_char = this_function[i_char]        
@@ -151,7 +151,6 @@ def lex_func(this_function):
                 this_char = this_function[i_char]
             print("strg%d" % n_strings)
             n_strings += 1
-            i_char-=1
             continue;
 
         if this_char == "\'":
@@ -164,7 +163,6 @@ def lex_func(this_function):
                 this_char = this_function[i_char]
             print("strg%d" % n_strings)
             n_strings += 1
-            i_char-=1
             continue;
         # END deal with strings
         ##############################
