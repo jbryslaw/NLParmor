@@ -97,6 +97,7 @@ def lex_func(this_function):
 
     # literal count
     n_strings = 0
+    n_char    = 0
     n_int     = 0
     n_float   = 0
 
@@ -144,26 +145,71 @@ def lex_func(this_function):
         if this_char == "\"":            
             i_char += 1
             if i_char >= len(this_function): break
-            this_char = this_function[i_char]        
+            this_char = this_function[i_char]
+            st_strg = ""
             while (this_char != "\""):
+                st_strg += this_char
                 i_char += 1
                 if i_char >= len(this_function): break
                 this_char = this_function[i_char]
-            print("strg%d" % n_strings)
-            n_strings += 1
+
+            if st_strg == "": continue
+            
+            l_literals.extend(st_strg)
+            print("HERE ",st_strg)
+            # check if this str has been used:
+            if not (st_strg in d_str):
+                d_str[st_strg] = n_strings
+                atemp = ("str%d" % n_strings)
+                l_names.extend([atemp])
+                n_strings +=1
+                #add token if str num is in list
+                try:
+                    l_tokens.extend([cpp_dict[atemp]])
+                except:
+                    pass
             continue;
 
-        if this_char == "\'":
+        #deal with chars
+        if this_char == "\'":            
             i_char += 1
             if i_char >= len(this_function): break
-            this_char = this_function[i_char]        
+            this_char = this_function[i_char]
+            char_string = ""
             while (this_char != "\'"):
+                char_string += this_char
                 i_char += 1
                 if i_char >= len(this_function): break
                 this_char = this_function[i_char]
-            print("strg%d" % n_strings)
-            n_strings += 1
+
+            if char_string == "": continue
+            
+            l_literals.extend(char_string)
+            print("HERE ",char_string)
+            # check if this str has been used:
+            if not (char_string in d_char):
+                d_char[char_string] = n_char
+                atemp = ("char%d" % n_char)
+                l_names.extend([atemp])
+                n_char +=1
+                #add token if str num is in list
+                try:
+                    l_tokens.extend([cpp_dict[atemp]])
+                except:
+                    pass
             continue;
+
+        # if this_char == "\'":
+        #     i_char += 1
+        #     if i_char >= len(this_function): break
+        #     this_char = this_function[i_char]        
+        #     while (this_char != "\'"):
+        #         i_char += 1
+        #         if i_char >= len(this_function): break
+        #         this_char = this_function[i_char]
+        #     print("strg%d" % n_strings)
+        #     n_strings += 1
+        #     continue;
         # END deal with strings
         ##############################
         
@@ -233,7 +279,6 @@ def lex_func(this_function):
                 if not (nstring in d_floats):
                     d_floats[nstring] = n_float
                     atemp = ("float%d" % n_float)
-                    atemp = "float21"
                     l_names.extend([atemp])
                     n_float+=1
                     # add token if var num is in list
