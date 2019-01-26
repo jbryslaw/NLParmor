@@ -223,12 +223,13 @@ def lex_func(this_function):
                 if i_char >= len(this_function): break
                 this_char = this_function[i_char]
 
-                            
-            print(nstring)
-            
-            
-            l_names.extend([nstring])
-            l_literals.extend([nstring])
+            # check if number is a float or int
+            #float:
+            if '.' in nstring:
+                l_names.extend([nstring])
+                l_literals.extend([nstring])
+            #int:
+            else:
             
             i_char-=1
             continue;
