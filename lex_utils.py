@@ -105,7 +105,9 @@ def lex_func(this_function):
     
     n_vars = 0
     d_vars = dict()
-    d_
+    d_str  = dict()
+    d_char = dict()
+    d_floats = dict()
 
     this_function+= ' '
     while i_char < (len(this_function)-1):
@@ -230,7 +232,10 @@ def lex_func(this_function):
                 l_literals.extend([nstring])
             #int:
             else:
-            
+                for subchar in nstring:
+                    l_tokens.extend([cpp_dict[subchar]])
+                    l_names.extend([subchar])
+                    l_literals.extend([subchar])
             i_char-=1
             continue;
         # check for numbers
