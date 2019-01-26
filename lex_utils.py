@@ -32,6 +32,8 @@ def lex_func(this_function):
                 "double":28,
                 "float":29,
                 "=":30,
+
+                # var identifiers ( my_int )
                 "var0":50,
                 "var1":51,
                 "var2":52,
@@ -42,6 +44,8 @@ def lex_func(this_function):
                 "var7":57,
                 "var8":58,
                 "var9":59,
+
+                # string literals ( "/home/" )
                 "str0":60,
                 "str1":61,
                 "str2":62,
@@ -52,6 +56,8 @@ def lex_func(this_function):
                 "str7":67,
                 "str8":68,
                 "str9":69,
+
+                # char literals ( 'a' )
                 "char0":70,
                 "char1":71,
                 "char2":72,
@@ -61,7 +67,20 @@ def lex_func(this_function):
                 "char6":76,
                 "char7":77,
                 "char8":78,
-                "char9":79
+                "char9":79,
+
+                #float literals (123.235)
+                "float0":80,
+                "float1":81,
+                "float2":82,
+                "float3":83,
+                "float4":84,
+                "float5":85,
+                "float6":86,
+                "float7":87,
+                "float8":88,
+                "float9":89
+
 
                 }
 
@@ -86,6 +105,7 @@ def lex_func(this_function):
     
     n_vars = 0
     d_vars = dict()
+    d_
 
     this_function+= ' '
     while i_char < (len(this_function)-1):
@@ -203,7 +223,7 @@ def lex_func(this_function):
                 if i_char >= len(this_function): break
                 this_char = this_function[i_char]
 
-                
+                            
             print(nstring)
             
             
