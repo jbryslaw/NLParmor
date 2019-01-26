@@ -146,7 +146,7 @@ def lex_func(this_function):
             i_char += 1
             if i_char >= len(this_function): break
             this_char = this_function[i_char]
-            st_strg = ""
+            st_strg = ""            
             while (this_char != "\""):
                 st_strg += this_char
                 i_char += 1
@@ -154,9 +154,9 @@ def lex_func(this_function):
                 this_char = this_function[i_char]
 
             if st_strg == "": continue
-            
-            l_literals.extend(st_strg)
-            print("HERE ",st_strg)
+
+            if len(st_strg)<10: l_literals.extend([st_strg])
+            else: l_literals.extend(["long_str"])
             # check if this str has been used:
             if not (st_strg in d_str):
                 d_str[st_strg] = n_strings
@@ -184,7 +184,7 @@ def lex_func(this_function):
 
             if char_string == "": continue
             
-            l_literals.extend(char_string)
+            l_literals.extend([char_string])
             print("HERE ",char_string)
             # check if this str has been used:
             if not (char_string in d_char):
