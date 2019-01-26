@@ -235,11 +235,14 @@ def lex_func(this_function):
                 if not (nstring in d_floats):
                     d_floats[nstring] = n_float
                     atemp = ("float%d" % n_float)
+                    atemp = "float21"
                     l_names.extend([atemp])
                     n_float+=1
                     # add token if var num is in list
                     try:
                         l_tokens.extend([cpp_dict[atemp]])
+                    #cpp_dict only sees first 10 floats
+                    # more floats won't be stored as tokens
                     except:
                         pass
             #int:
