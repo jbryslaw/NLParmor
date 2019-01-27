@@ -274,7 +274,12 @@ def lex_func(this_function):
                 "float6":260,
                 "float7":261,
                 "float8":262,
-                "float9":263                
+                "float9":263,
+
+                #additional
+                "\"'\"":264
+ #               '\'':265,
+#                '\\':266
                 }
 
     #comments:
@@ -341,7 +346,7 @@ def lex_func(this_function):
                 l_tokens.extend([cpp_dict[tri_strg]])
                 l_names.extend([tri_strg])
                 l_literals.extend([tri_strg])
-                i_char+=3
+                i_char+=2
                 continue
             except:
                 pass
@@ -359,7 +364,7 @@ def lex_func(this_function):
                 l_tokens.extend([cpp_dict[di_strg]])
                 l_names.extend([di_strg])
                 l_literals.extend([di_strg])
-                i_char+=2
+                i_char+=1
                 continue
             except:
                 pass
