@@ -371,7 +371,7 @@ def lex_func(this_function):
         if this_char == "\"":            
             i_char += 1
             if i_char >= len(this_function): break
-            this_char = this_function[i_char+1]
+            this_char = this_function[i_char]
             st_strg = ""
             while (this_char != "\""):
                 st_strg += this_char
@@ -384,16 +384,21 @@ def lex_func(this_function):
             if len(st_strg)<10: l_literals.extend([st_strg])
             else: l_literals.extend(["long_str"])
             # check if this str has been used:
+            i_strings = 0
             if not (st_strg in d_str):
                 d_str[st_strg] = n_strings
-                atemp = ("str%d" % n_strings)
-                l_names.extend([atemp])
+                i_strings = n_strings
                 n_strings +=1
-                #add token if str num is in list
-                try:
-                    l_tokens.extend([cpp_dict[atemp]])
-                except:
-                    pass
+            else: i_strings = d_str[st_strg]
+                
+            atemp = ("str%d" % i_strings)
+            l_names.extend([atemp])
+                
+            #add token if str num is in list
+            try:
+                l_tokens.extend([cpp_dict[atemp]])
+            except:
+                pass
             continue;
 
         #deal with chars
@@ -449,11 +454,13 @@ def lex_func(this_function):
             #not a keyword:
             except:
                 # check if this variable name has been used before
-                i_vars = n_vars
+                i_vars = 0
                 if not (astring in d_vars):
                     d_vars[astring] = n_vars
+                    i_vars = n_vars
                     n_vars += 1
-                else: i_vars = d_vars[astring]
+                else:
+                    i_vars = d_vars[astring]
 
                 atemp = ("var%d" % i_vars)
                 # right now, writing duplicates to tokenization
