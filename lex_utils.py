@@ -38,7 +38,6 @@ def lex_func(this_function):
                 "?":32,
                 ",":33,
                 "#":34,
-                
 
                 #digraphs
                 "->":35,
@@ -318,8 +317,16 @@ def lex_func(this_function):
         # END check for digraphs
         ##############################
         if (i_char+1) < len(this_function):
+            di_strg = this_char
+            di_strg += this_function[i_char+1]
+            
             try:
-                l_tokens.extend([cpp_dict[atemp]])
+                l_tokens.extend([cpp_dict[di_strg]])
+                l_names.extend([di_strg])
+                l_literals.extend([di_strg])
+                i_char+=2
+                print(" digraph!")
+                continue
             except:
                 pass
 
@@ -335,8 +342,8 @@ def lex_func(this_function):
         if this_char == "\"":            
             i_char += 1
             if i_char >= len(this_function): break
-            this_char = this_function[i_char]
-            st_strg = ""            
+            this_char = this_function[i_char+1]
+            st_strg = ""
             while (this_char != "\""):
                 st_strg += this_char
                 i_char += 1
@@ -487,16 +494,16 @@ def lex_func(this_function):
 
         ##############################
         # check for arrows
-        if (i_char+1) < len(this_function):
-            if (this_char == "-") and this_function[i_char+1] == ">":
-                i_char+=2
-                if i_char >= len(this_function): break
-                this_char = this_function[i_char]
-                l_tokens.extend([cpp_dict["->"]])
-                l_names.extend(["->"])
-                l_literals.extend(["->"])
-                i_char-=1
-                continue;
+        # if (i_char+1) < len(this_function):
+        #     if (this_char == "-") and this_function[i_char+1] == ">":
+        #         i_char+=2
+        #         if i_char >= len(this_function): break
+        #         this_char = this_function[i_char]
+        #         l_tokens.extend([cpp_dict["->"]])
+        #         l_names.extend(["->"])
+        #         l_literals.extend(["->"])
+        #         i_char-=1
+        #         continue;
         # END check for arrows
         ##############################
 
