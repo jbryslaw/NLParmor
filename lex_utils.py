@@ -406,28 +406,35 @@ def lex_func(this_function):
             i_char += 1
             if i_char >= len(this_function): break
             this_char = this_function[i_char]
-            char_string = ""
+            st_strg = ""
             while (this_char != "\'"):
-                char_string += this_char
+                st_strg += this_char
                 i_char += 1
                 if i_char >= len(this_function): break
                 this_char = this_function[i_char]
 
-            if char_string == "": continue
-            
-            l_literals.extend([char_string])
+            if st_strg == "": continue
+
+            if len(st_strg)<10: l_literals.extend([st_strg])
+            else: l_literals.extend(["long_str"])
             # check if this str has been used:
-            if not (char_string in d_char):
-                d_char[char_string] = n_char
-                atemp = ("char%d" % n_char)
-                l_names.extend([atemp])
-                n_char +=1
-                #add token if str num is in list
-                try:
-                    l_tokens.extend([cpp_dict[atemp]])
-                except:
-                    pass
+            i_strings = 0
+            if not (st_strg in d_str):
+                d_str[st_strg] = n_strings
+                i_strings = n_strings
+                n_strings +=1
+            else: i_strings = d_str[st_strg]
+                
+            atemp = ("char%d" % i_strings)
+            l_names.extend([atemp])
+                
+            #add token if str num is in list
+            try:
+                l_tokens.extend([cpp_dict[atemp]])
+            except:
+                pass
             continue;
+
 
         # END deal with strings
         ##############################
