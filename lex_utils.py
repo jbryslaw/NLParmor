@@ -1,4 +1,6 @@
 def lex_func(this_function):
+    b_verbose = False
+    
     #####################################################
     ####### Dictionary of Special characters and keywords
     cpp_dict = {"0":0,
@@ -552,7 +554,7 @@ def lex_func(this_function):
             l_names.extend([this_char])
             l_literals.extend([this_char])
         except:
-            print("\"",this_char,"\" not in dictionary")
+            if b_verbose: print("\"",this_char,"\" not in dictionary")
         #### END Tokenize special characters
         ##############################
 
