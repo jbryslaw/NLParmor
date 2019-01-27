@@ -69,7 +69,6 @@ def lex_func(this_function):
                 "%>":61,
                 "%:":62,
                                 
-
                 #trigraphs
                 "<<=":63,
                 ">>=":64,
@@ -82,9 +81,8 @@ def lex_func(this_function):
                 "??'":71,
                 "??!":72,
                 "??-":73,
-
                 
-                #keywords                
+                #keywords
                 "alignas":74,
                 "alignof":75,
                 "and":76,
@@ -253,7 +251,9 @@ def lex_func(this_function):
                 "float6":230,
                 "float7":231,
                 "float8":232,
-                "float9":233,
+                "float9":233
+                
+                
                 }
 
     #comments:
@@ -312,14 +312,30 @@ def lex_func(this_function):
         ##############################
 
         ##############################
+        # check for trigraphs
+        #if this and next char and next are dict ...
+        if (i_char+2) < len(this_function):
+            tri_strg = this_char
+            tri_strg += this_function[i_char+1]
+            tri_strg += this_function[i_char+2]
+            try:
+                l_tokens.extend([cpp_dict[tri_strg]])
+                l_names.extend([tri_strg])
+                l_literals.extend([tri_strg])
+                i_char+=3
+                continue
+            except:
+                pass
+        # END check for trigraphs
+        ##############################
+
+        ##############################
         # check for digraphs
         #if this and next char are dict ...
-        # END check for digraphs
-        ##############################
         if (i_char+1) < len(this_function):
             di_strg = this_char
             di_strg += this_function[i_char+1]
-            
+                    
             try:
                 l_tokens.extend([cpp_dict[di_strg]])
                 l_names.extend([di_strg])
@@ -329,14 +345,9 @@ def lex_func(this_function):
                 continue
             except:
                 pass
-
-        ##############################
-        # check for trigraphs
-        #if this and next char and next are dict ...
-        # END check for trigraphs
+        # END check for digraphs
         ##############################
 
-        
         ##############################
         #deal with strings
         if this_char == "\"":            
@@ -489,22 +500,6 @@ def lex_func(this_function):
             i_char-=1
             continue;
         # check for numbers
-        ##############################
-
-
-        ##############################
-        # check for arrows
-        # if (i_char+1) < len(this_function):
-        #     if (this_char == "-") and this_function[i_char+1] == ">":
-        #         i_char+=2
-        #         if i_char >= len(this_function): break
-        #         this_char = this_function[i_char]
-        #         l_tokens.extend([cpp_dict["->"]])
-        #         l_names.extend(["->"])
-        #         l_literals.extend(["->"])
-        #         i_char-=1
-        #         continue;
-        # END check for arrows
         ##############################
 
         ##need to check other digraphs and trigraphs
