@@ -32,7 +32,7 @@ def lex_func(this_function):
                 "/":26,
                 "%":27,
                 "<":28,
-                "<":29,
+                ">":29,
                 "&":30,
                 "^":31,
                 "?":32,
@@ -217,43 +217,64 @@ def lex_func(this_function):
                 "var8":202,
                 "var9":203,
 
+                "var10":204,
+                "var11":205,
+                "var12":206,
+                "var13":207,
+                "var14":208,
+                "var15":209,
+                "var16":210,
+                "var17":211,
+                "var18":212,
+                "var19":213,
+
+                "var20":224,
+                "var21":225,
+                "var22":226,
+                "var23":227,
+                "var24":228,
+                "var25":229,
+                "var26":220,
+                "var27":221,
+                "var28":222,
+                "var29":223,
+
+
                 # string literals ( "/home/" )
-                "str0":204,
-                "str1":205,
-                "str2":206,
-                "str3":207,
-                "str4":208,
-                "str5":209,
-                "str6":210,
-                "str7":211,
-                "str8":212,
-                "str9":213,
+                "str0":234,
+                "str1":235,
+                "str2":236,
+                "str3":237,
+                "str4":238,
+                "str5":239,
+                "str6":240,
+                "str7":241,
+                "str8":242,
+                "str9":243,
 
                 # char literals ( 'a' )
-                "char0":214,
-                "char1":215,
-                "char2":216,
-                "char3":217,
-                "char4":218,
-                "char5":219,
-                "char6":220,
-                "char7":221,
-                "char8":222,
-                "char9":223,
+                "char0":244,
+                "char1":245,
+                "char2":246,
+                "char3":247,
+                "char4":248,
+                "char5":249,
+                "char6":250,
+                "char7":251,
+                "char8":252,
+                "char9":253,
 
                 #float literals (123.235)
-                "float0":224,
-                "float1":225,
-                "float2":226,
-                "float3":227,
-                "float4":228,
-                "float5":229,
-                "float6":230,
-                "float7":231,
-                "float8":232,
-                "float9":233
-                
-                
+                "float0":254,
+                "float1":255,
+                "float2":256,
+                "float3":257,
+                "float4":258,
+                "float5":259,
+                "float6":260,
+                "float7":261,
+                "float8":262,
+                "float9":263                
                 }
 
     #comments:
@@ -263,7 +284,6 @@ def lex_func(this_function):
     ### END Dictionary of Special characters and keywords
     #####################################################
 
-    print(" lexing:")
     i_char = -1
 
     # literal count
@@ -291,7 +311,6 @@ def lex_func(this_function):
         #ignore whitespace
         if this_char.isspace(): continue
 
-        print(" lexing c: ",this_char)
         ##############################
         # clear comments
         if this_char == "/" and (i_char+1 < len(this_function)):
@@ -341,7 +360,6 @@ def lex_func(this_function):
                 l_names.extend([di_strg])
                 l_literals.extend([di_strg])
                 i_char+=2
-                print(" digraph!")
                 continue
             except:
                 pass
@@ -393,7 +411,6 @@ def lex_func(this_function):
             if char_string == "": continue
             
             l_literals.extend([char_string])
-            print("HERE ",char_string)
             # check if this str has been used:
             if not (char_string in d_char):
                 d_char[char_string] = n_char
@@ -423,28 +440,30 @@ def lex_func(this_function):
                 if i_char >= len(this_function): break
                 this_char = this_function[i_char]
 
-            print(astring)
             #  ########check alphanumeric string for keywords, and tokenize
             try:
                 l_tokens.extend([cpp_dict[astring]])
                 l_names.extend([astring])
                 l_literals.extend([astring])
-                print("found ",this_char)
 
             #not a keyword:
             except:
                 # check if this variable name has been used before
+                i_vars = n_vars
                 if not (astring in d_vars):
                     d_vars[astring] = n_vars
-                    l_literals.extend([astring])
-                    atemp = ("var%d" % n_vars)                    
-                    l_names.extend([atemp])
-                    n_vars += 1                    
-                    # Add token if var num is in list
-                    try:
-                        l_tokens.extend([cpp_dict[atemp]])
-                    except:
-                        pass
+                    n_vars += 1
+                else: i_vars = d_vars[astring]
+
+                atemp = ("var%d" % i_vars)
+                # right now, writing duplicates to tokenization
+                l_literals.extend([astring])                    
+                l_names.extend([atemp])
+                # Add token if var num is in list
+                try:
+                    l_tokens.extend([cpp_dict[atemp]])
+                except:
+                    pass
 
             i_char-=1
             continue;
@@ -513,7 +532,6 @@ def lex_func(this_function):
             l_tokens.extend([cpp_dict[this_char]])
             l_names.extend([this_char])
             l_literals.extend([this_char])
-            print("found ",this_char)
         except:
             print("\"",this_char,"\" not in dictionary")
         #### END Tokenize special characters
