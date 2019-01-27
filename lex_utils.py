@@ -329,9 +329,9 @@ def lex_func(this_function):
             elif this_function[i_char+1] == "*":
                 i_char += 1
                 if i_char >= len(this_function): break
-                while (this_char != "*") and (this_function[i_char+1] != "/"):                
+                while (this_char != "*") and (this_function[i_char+1] != "/"):
                     i_char += 1
-                    if i_char >= len(this_function): break
+                    if i_char+1 >= len(this_function): break
                     this_char = this_function[i_char]
                 pass
         # END clear comments
