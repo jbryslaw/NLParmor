@@ -13,17 +13,18 @@ from NLParmor_model import NLP_model
 
 #################################
 ### Consts
-_MAXLEN = 100 #max function length in number of tokens
+_MAXLEN = 200 #max function length in number of tokens
+#_MAXLEN = 400 #max function length in number of tokens 
 _MAXLEN = _MAXLEN
 FRAC_TEST=.2 #Fraction of data to set aside for testing
 TOKEN_UNIVERSE = 266 # Number of unique tokens
-N_epoch = 3 #12
+N_epoch = 12
 #################################
 
 #################################
 ### switches
 b_plot      = False #True #False
-b_load_model_from_file = False # True #False #True #False #True #False
+b_load_model_from_file = True #False #True #False # True #False #True #False #True #False
 #################################
 
 #################################
@@ -100,6 +101,11 @@ cm = confusion_matrix(y_1D_test,y_pred)
 if len(y_1D_test) != 0.: cm = cm/len(y_1D_test)
 print(cm)
 
+precision = cm[0,0] / (cm[0,0]+cm[0,1])
+print(" p: ",precision)
+recall    = cm[0,0] / (cm[0,0]+cm[1,0])
+print(" r: ",recall)
+
 ##############################
 ### save model to file
 if not b_load_model_from_file:
@@ -112,4 +118,5 @@ if not b_load_model_from_file:
         # serialize weights to HDF5
     model.save_weights(c_w_out)
     print("Saved model to disk")
+##############################
 ##############################
