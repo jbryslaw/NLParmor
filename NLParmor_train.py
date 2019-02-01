@@ -24,7 +24,7 @@ N_epoch = 15
 #################################
 ### switches
 b_plot      = False #True #False
-b_load_model_from_file = False #True #False
+b_load_model_from_file = False #True #False #True #False
 # do a binary classification (yes/no vuln) or categorical classification
 b_binary    = True #False 
 #################################
@@ -32,10 +32,10 @@ b_binary    = True #False
 #################################
 ### training file
 # df_total  = pd.read_pickle("train0_rebalenced.plk")
-df_total  = pd.read_pickle("all_rebalenced.plk")
-
+#df_total  = pd.read_pickle("all_rebalenced.plk")
+df_total  = pd.read_pickle("all_but_test_rebalenced.plk")
 #df_total  = pd.read_pickle("all_but_test.plk")    # unbalanced
-df_total  = df_total.iloc[0:100000]
+#df_total  = df_total.iloc[0:200000]
 df_test   = pd.read_pickle("test_rebalenced.plk") # balanced
 b_use_separate_test_file = True #False #True #False#True#False #True
 #################################
@@ -110,7 +110,7 @@ else:
 
 # Train new model, or load from file
 if not b_load_model_from_file:
-    model = NLP_model(b_binary, w_embed, _MAXLEN, TOKEN_UNIVERSE, TOKEN_UNIVERSE, len(labels[0]))
+    model = NLP_model(b_binary, len(labels[0]), _MAXLEN, TOKEN_UNIVERSE, w_embed)
     model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['acc'])
     print(model.summary())
     model.fit(train_X, train_y, epochs=N_epoch, batch_size=128, validation_data=(test_X, test_y))
@@ -131,8 +131,8 @@ if b_binary:
     y_pred   = predict[:,1] > 0.5
     y_1D_test = test_y[:,1] == 1 
     cm = confusion_matrix(y_1D_test,y_pred)
-    if len(y_1D_test) != 0.:
-        cm = cm/len(y_1D_test)
+    # if len(y_1D_test) != 0.:
+    #     cm = cm/len(y_1D_test)
     print(cm)
 
     precision = cm[0,0] / (cm[0,0]+cm[0,1])
@@ -140,6 +140,9 @@ if b_binary:
     recall    = cm[0,0] / (cm[0,0]+cm[1,0])
     print(" r: ",recall)
     final_acc       = cm[0,0]+cm[1,1]
+    if len(y_1D_test) != 0.:
+        final_acc = final_acc/len(y_1D_test)
+
     print(" a: ",final_acc)
 else:
     predict = model.predict(test_X)
