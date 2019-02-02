@@ -35,7 +35,7 @@ def NLP_model(b_binary, labels_index, max_length, TOKEN_UNIVERSE, Embed ):
     # ly_final_conv = Conv1D(filters=128, kernel_size=3, activation=st_act)(ly_merge)
     # ly_final_pool = MaxPooling1D(pool_size=3)(ly_final_pool)
     # ly_final_drop = Dropout(0.5)(ly_final_drop)
-    
+    #    ly_final_batchN = BatchNormalization()(ly_merge)
     ly_drop = Dropout(0.5)(ly_merge)
     ly_flat = Flatten()(ly_drop)
 
