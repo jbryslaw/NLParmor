@@ -6,6 +6,7 @@ from keras.utils import to_categorical
 from keras.models import model_from_json
 from keras.models import Model
 from keras.utils import plot_model
+from keras.callbacks import ModelCheckpoint
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -25,6 +26,7 @@ _MAXLEN = _MAXLEN
 FRAC_TEST=.2 #Fraction of data to set aside for testing
 TOKEN_UNIVERSE = 266 # Number of unique tokens
 N_epoch = 100
+#N_epoch = 2
 # there are 29 functions without vulnerabilites
 #    to every 2 vulnerable functions
 #class_weights = {0:29,1:2}
@@ -36,10 +38,11 @@ class_weights = {0:1,1:1}
 #################################
 ### switches
 b_floss     = False#True #False #True #True #False
-b_plot      = False #True #False
-b_load_model_from_file = True#False#True#False #True #False #True #False #True #False
+b_plot      = True #False #True #False
+b_load_model_from_file = True #False #True#False#True#False #True #False #True #False #True #False
 # do a binary classification (yes/no vuln) or categorical classification
-b_binary    = True #False 
+b_binary    = True #False
+b_start_from_previous_model = True
 #################################
 
 #################################
@@ -50,6 +53,7 @@ b_binary    = True #False
 #df_total  = pd.read_pickle("all_but_test.plk")    # unbalanced
 #df_total  = pd.read_pickle("all_train.plk")    # unbalanced
 df_total  = pd.read_pickle("all_train_rebalanced.plk")    # balanced
+#df_total  = df_total.iloc[0:10000]
 df_balance = pd.read_pickle("all_train_rebalanced.plk")    # balanced
 df_balance  = df_balance.iloc[0:10000]
 #df_total  = df_total.iloc[0:10000]
@@ -63,20 +67,21 @@ b_use_separate_test_file = True #False #True #False#True#False #True
 ##### modelfiles
 model_in_json = 'model_rtest_e3.json'
 model_in_h5   = "model_rtest_e3.h5"
+#model_in_h5   = "checkpoints/w_01_0.74.hdf5"
 
 #################################
 
 ################################
-## Plot 
-if b_plot:
-    t_lens = df_total.iloc[:,6].str.len()
-    fig = plt.figure(figsize=(10, 10))
-    ax = plt.subplot(111)
-    ax.set_yscale("log")
-    plt.xlabel('Sentence length')
-    plt.ylabel('Number of sentences')
-    plt.hist(t_lens, bins=40)
-    plt.show()
+## Plot Sentence Length
+# if b_plot:
+#     t_lens = df_total.iloc[:,6].str.len()
+#     fig = plt.figure(figsize=(10, 10))
+#     ax = plt.subplot(111)
+#     ax.set_yscale("log")
+#     plt.xlabel('Sentence length')
+#     plt.ylabel('Number of sentences')
+#     plt.hist(t_lens, bins=40)
+#     plt.show()
 ###############################
 
 ###############################
@@ -180,13 +185,22 @@ if not b_load_model_from_file:
     print(model.summary())
     #    plot_model(model, to_file='schematic.svg',show_layer_names=False)
     #model.fit(train_X, train_y, epochs=N_epoch, batch_size=128, validation_data=(test_X, test_y),class_weight=class_weights)
-    model.fit(train_X, train_y, epochs=N_epoch, batch_size=128, validation_data=(test_X, test_y))
+
+    if(b_start_from_previous_model):
+        model.load_weights(model_in_h5)
+
+    ### ###add checkpoints
+    m_checkpoints   = ModelCheckpoint("checkpoints/w_{epoch:02d}_{val_acc:.2f}.hdf5",
+                                      monitor='val_acc', verbose=1, save_best_only=True)
+
+    
+    model.fit(train_X, train_y, epochs=N_epoch, batch_size=128, validation_data=(test_X, test_y),callbacks=[m_checkpoints])
 else:
     #load model
     with open(model_in_json,'r') as model_file:
         js_model = model_file.read()
         model = model_from_json(js_model)
-        # load weights
+        # load weight
     model.load_weights(model_in_h5)
     model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['acc'])
     print(model.summary())
@@ -278,13 +292,14 @@ def plot_cm(cm, classes,
 
 
 ## ###plot cm
-np.set_printoptions(precision=2)
+if b_plot:
+    np.set_printoptions(precision=2)
 
-plt.figure()
-class_names = ['Vulnerable','Not Vulnerable']
-plot_cm(cm, classes=class_names, normalize=True,
-                       title='Normalized confusion matrix')
-plt.show()
+    plt.figure()
+    class_names = ['Vulnerable','Not Vulnerable']
+    plot_cm(cm, classes=class_names, normalize=True,
+                           title='Normalized confusion matrix')
+    plt.show()
 
 
 ##############################
