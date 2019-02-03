@@ -38,7 +38,7 @@ class_weights = {0:1,1:1}
 #################################
 ### switches
 b_floss     = False#True #False #True #True #False
-b_plot      = True #False #True #False
+b_plot      = False #True #False
 b_load_model_from_file = True #False #True#False#True#False #True #False #True #False #True #False
 # do a binary classification (yes/no vuln) or categorical classification
 b_binary    = True #False
