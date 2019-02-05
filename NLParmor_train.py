@@ -18,6 +18,7 @@ from sklearn.metrics import f1_score
 from NLParmor_model import NLP_model
 import itertools
 import losses
+from plt_histogram import plt_histogram
 
 #################################
 ### Consts
@@ -27,25 +28,26 @@ _MAXLEN = 200 #max function length in number of tokens
 _MAXLEN = _MAXLEN
 FRAC_TEST=.2 #Fraction of data to set aside for testing
 TOKEN_UNIVERSE = 266 # Number of unique tokens
-N_epoch = 3
+N_epoch = 6
 #N_epoch = 2
 # there are 29 functions without vulnerabilites
 #    to every 2 vulnerable functions
 #class_weights = {0:29,1:2}
 #class_weights = {0:2,1:29}
 #class_weights = {0:2,1:50}
-class_weights = {0:1,1:1}
+#class_weights = {0:29,1:2}
+class_weights = {0:2,1:29}
 #################################
 
 #################################
 ### switches
-b_floss      = True#False#True #False #True #True #False
-b_plot       = True #False #True #False #True #False #True #False
-b_load_model_from_file = True #False # True #False #True #False #True#False#True#False #True #False #True #False #True #False
+b_floss      = False#True #False #True #True #False
+b_plot       = False#True #False #True #False #True #False #True #False
+b_load_model_from_file = False #True #False # True #False #True #False #True#False#True#False #True #False #True #False #True #False
 # do a binary classification (yes/no vuln) or categorical classification
 b_binary     = True #False
 b_start_from_previous_model = True
-b_save_model = False
+b_save_model = True #False
 #################################
 
 #################################
@@ -54,8 +56,9 @@ b_save_model = False
 #df_total  = pd.read_pickle("all_rebalenced.plk")
 #df_total  = pd.read_pickle("all_but_test_rebalenced.plk")
 #df_total  = pd.read_pickle("all_but_test.plk")    # unbalanced
-#df_total  = pd.read_pickle("all_train.plk")    # unbalanced
-df_total  = pd.read_pickle("all_train_rebalanced.plk")    # balanced
+df_total  = pd.read_pickle("all_train.plk")    # unbalanced
+#df_total  = df_total.iloc[210000:300000]
+#df_total  = pd.read_pickle("all_train_rebalanced.plk")    # balanced
 #df_total  = df_total.iloc[0:10000]
 df_balance = pd.read_pickle("all_train_rebalanced.plk")    # balanced
 df_balance  = df_balance.iloc[0:10000]
@@ -173,19 +176,37 @@ def floss():
         return loss
     return Floss
 
+# Define Recall to be used as a metric in the CNN:
+def REC(truth,reco):
+    truth = truth
+    reco  = reco
+
+    c_truth = kb.clip(truth,0.,1.)
+    c_reco  = kb.clip(reco,0.,1.)
+
+    #use round to get >0.5
+    TP = kb.sum(kb.round(c_truth*c_reco))
+    T  = kb.sum(kb.round(c_truth))
+
+    #make sure T isn't 0, and get recall:
+    T  = T + kb.epsilon()
+    recall = TP/T
+    #return kb.mean(kb.equal(truth, kb.round(reco)))
+    return recall
+
 # Train new model, or load from file
 if not b_load_model_from_file:
     model = NLP_model(b_binary, len(labels[0]), _MAXLEN, TOKEN_UNIVERSE, w_embed)
     if b_floss:
         #train with a few epochs of CE before trying floss
- #       model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['acc'])
+ #       model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['acc',REC])
         #model.fit(train_X, train_y, epochs=3, batch_size=128, validation_data=(test_X, test_y),class_weight=class_weights)
 #        model.fit(bal_tokens, bal_labels, epochs=1, batch_size=128, validation_data=(test_X, test_y),class_weight=class_weights)
 
-        model.compile(loss=floss(),optimizer='SGD',metrics=['acc'])
-        #model.compile(loss=losses.focal(),optimizer='SGD',metrics=['acc'])
+        model.compile(loss=floss(),optimizer='SGD',metrics=['acc',REC])
+        #model.compile(loss=losses.focal(),optimizer='SGD',metrics=['acc',REC])
     else:
-        model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['acc'])
+        model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['acc',REC])
         
     print(model.summary())
     #    plot_model(model, to_file='schematic.svg',show_layer_names=False)
@@ -197,9 +218,8 @@ if not b_load_model_from_file:
     ### ###add checkpoints
     m_checkpoints   = ModelCheckpoint("checkpoints/w_{epoch:02d}_{val_acc:.2f}.hdf5",
                                       monitor='val_acc', verbose=1, save_best_only=True)
-
     
-    model.fit(train_X, train_y, epochs=N_epoch, batch_size=128, validation_data=(test_X, test_y),callbacks=[m_checkpoints])
+    model.fit(train_X, train_y, epochs=N_epoch, batch_size=128, validation_data=(test_X, test_y),callbacks=[m_checkpoints],class_weight=class_weights)
 else:
     #load model
     with open(model_in_json,'r') as model_file:
@@ -207,7 +227,7 @@ else:
         model = model_from_json(js_model)
         # load weight
     model.load_weights(model_in_h5)
-    model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['acc'])
+    model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['acc',REC])
     print(model.summary())
 
 l_cm_labels = [True,False]
@@ -220,6 +240,7 @@ if b_binary:
     y_1D_test = test_y[:,1] == 1
     
     a_FN = np.logical_and(np.logical_not(y_pred),y_1D_test)
+    #FP:    a_FN = np.logical_and(y_pred,np.logical_not(y_1D_test))
     print(a_FN)
     
     cm = confusion_matrix(y_1D_test,y_pred,labels=l_cm_labels)
@@ -228,9 +249,7 @@ if b_binary:
     print(cm)
     df_test['FN'] = pd.DataFrame(a_FN)
     df_FN = df_test.loc[df_test.FN==True]
-    print("***********************************")
-    print(df_FN)
-    print("***********************************")
+    plt_histogram(df_FN)
     
     precision = cm[0,0] / (cm[0,0]+cm[0,1])
     print(" p: ",precision)
