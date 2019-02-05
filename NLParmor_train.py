@@ -12,6 +12,8 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import matthews_corrcoef
+from sklearn.metrics import f1_score
 #import plot_confusion_matrix
 from NLParmor_model import NLP_model
 import itertools
@@ -25,7 +27,7 @@ _MAXLEN = 200 #max function length in number of tokens
 _MAXLEN = _MAXLEN
 FRAC_TEST=.2 #Fraction of data to set aside for testing
 TOKEN_UNIVERSE = 266 # Number of unique tokens
-N_epoch = 100
+N_epoch = 3
 #N_epoch = 2
 # there are 29 functions without vulnerabilites
 #    to every 2 vulnerable functions
@@ -37,12 +39,13 @@ class_weights = {0:1,1:1}
 
 #################################
 ### switches
-b_floss     = False#True #False #True #True #False
-b_plot      = False #True #False
-b_load_model_from_file = True #False #True#False#True#False #True #False #True #False #True #False
+b_floss      = True#False#True #False #True #True #False
+b_plot       = True #False #True #False #True #False #True #False
+b_load_model_from_file = True #False # True #False #True #False #True#False#True#False #True #False #True #False #True #False
 # do a binary classification (yes/no vuln) or categorical classification
-b_binary    = True #False
+b_binary     = True #False
 b_start_from_previous_model = True
+b_save_model = False
 #################################
 
 #################################
@@ -151,18 +154,20 @@ else:
 def floss():
     def Floss(truth,reco):
         # g -> floss power, a --> class weighting
-        # g=0, a=1 should produce normal CE
-        g=1.25
-        a=0.25
-        #a=0.25
-        clip = 1e15 #1e-9
-        reco = kb.clip(reco,clip,1-clip)
+        # g=0, a=0.5 should produce normal CE
+        gamma=0.
+        alpha=0.5
+        #alpha=0.25
+        clip = kb.epsilon()  #1e-1 #1e-12 #1e-9
+
         pT0 = tf.where(tf.equal(truth, 0), reco, tf.ones_like(reco))
         pT1 = tf.where(tf.equal(truth, 1), reco, tf.ones_like(reco))
 
-        loss = (-1)*kb.sum(a*kb.pow(1-pT1,g)*kb.log(pT1))-(kb.sum((1-a)*kb.pow(pT0,g)*kb.log(1-pT0)) )
-        # pT1 =  kb.clip(pT1,clip,1-clip)
-        # pT0 =  kb.clip(pT1,clip,1-clip)
+        pT1 =  kb.clip(pT1,clip,1-clip)
+        pT0 =  kb.clip(pT1,clip,1-clip)
+
+        loss = (-1)*kb.sum(alpha*kb.pow(1-pT1,gamma)*kb.log(pT1))
+        -(kb.sum((1-alpha)*kb.pow(pT0,gamma)*kb.log(1-pT0)) )
         # loss = (-1)*kb.mean(a*kb.pow(1-pT1,g)*kb.log(pT1))-(kb.mean((1-a)*kb.pow(pT0,g)*kb.log(1-pT0)) )
 
         return loss
@@ -173,9 +178,9 @@ if not b_load_model_from_file:
     model = NLP_model(b_binary, len(labels[0]), _MAXLEN, TOKEN_UNIVERSE, w_embed)
     if b_floss:
         #train with a few epochs of CE before trying floss
-        model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['acc'])
+ #       model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['acc'])
         #model.fit(train_X, train_y, epochs=3, batch_size=128, validation_data=(test_X, test_y),class_weight=class_weights)
-        model.fit(bal_tokens, bal_labels, epochs=1, batch_size=128, validation_data=(test_X, test_y),class_weight=class_weights)
+#        model.fit(bal_tokens, bal_labels, epochs=1, batch_size=128, validation_data=(test_X, test_y),class_weight=class_weights)
 
         model.compile(loss=floss(),optimizer='SGD',metrics=['acc'])
         #model.compile(loss=losses.focal(),optimizer='SGD',metrics=['acc'])
@@ -212,12 +217,21 @@ l_cm_labels = [True,False]
 if b_binary:
     predict = model.predict(test_X)
     y_pred   = predict[:,1] > 0.5
-    y_1D_test = test_y[:,1] == 1 
+    y_1D_test = test_y[:,1] == 1
+    
+    a_FN = np.logical_and(np.logical_not(y_pred),y_1D_test)
+    print(a_FN)
+    
     cm = confusion_matrix(y_1D_test,y_pred,labels=l_cm_labels)
     # if len(y_1D_test) != 0.:
     #     cm = cm/len(y_1D_test)
     print(cm)
-
+    df_test['FN'] = pd.DataFrame(a_FN)
+    df_FN = df_test.loc[df_test.FN==True]
+    print("***********************************")
+    print(df_FN)
+    print("***********************************")
+    
     precision = cm[0,0] / (cm[0,0]+cm[0,1])
     print(" p: ",precision)
     recall    = cm[0,0] / (cm[0,0]+cm[1,0])
@@ -227,6 +241,34 @@ if b_binary:
         final_acc = final_acc/len(y_1D_test)
 
     print(" a: ",final_acc)
+
+    #plot the CWEs that are causing FNs
+    t_FN = df_FN.iloc[:,6].str.len()
+    fig = plt.figure(figsize=(10, 10))
+    ax = plt.subplot(111)
+    ax.set_yscale("log")
+    plt.xlabel('Sentence length')
+    plt.ylabel('Number of sentences')
+    plt.hist(t_FN, bins=40)
+    plt.show()
+
+    
+    # calulate MCC
+    #MCC = matthews_corrcoef(y_1D_test,y_pred)
+    TP = cm[0,0]
+    TN = cm[1,1]
+    FP = cm[1,0]
+    FN = cm[0,1]
+    
+    MCC = ((TP*TN)-(FP*FN))/np.sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))
+    #MCC = (TP*TN)-(FP*FN)/(TP+FP)(TP+FN)(TN+FP)(TN+FN)
+    print(" MCC: ",MCC)
+
+    #calculate F1
+    F1  = f1_score(y_1D_test,y_pred,
+                   labels=l_cm_labels)
+    print(" F1: ",F1)
+    
 else:
     predict = model.predict(test_X)
     predict_tv =  predict > 0.5
@@ -257,7 +299,6 @@ else:
     print(" p: ",precision)
     recall    = cm[0,0] / (cm[0,0]+cm[1,0])
     print(" r: ",recall)
-
 
 
 def plot_cm(cm, classes,
@@ -304,7 +345,7 @@ if b_plot:
 
 ##############################
 ### save model to file
-if not b_load_model_from_file:
+if (not b_load_model_from_file) and b_save_model:
     # serialize model to JSON
     model_json = model.to_json()
     c_js_out = "model_rtest_e3.json"
