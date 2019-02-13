@@ -1,34 +1,24 @@
 from lex_utils import lex_func
 import sys
 import os.path
+import numpy as np
 
-this_function = " a->"
 # read function from file if one is passed
+this_function = ""
 if len(sys.argv) == 2:
     txt_infile = sys.argv[1]
     if(os.path.isfile(txt_infile)):
         with open(txt_infile,'r') as thisfile:
             this_function = thisfile.read()
     
-print(this_function)
-
-
 # lex the function
-l_tk_names = lex_func(this_function)
+l_tk = lex_func(this_function)
 
-    
-#while i_char < (len(this_function)-1):
-print(" tokens found:")
-print(l_tk_names[1])
-
-    
-print("Number of literals:")
-print(" N Strgs: ",l_tk_names[2])
-print(" N int: ",l_tk_names[3])
-print(" N float: ",l_tk_names[4])
+#print("Tokens:")
+print(l_tk[0])
+#print("Name:")
 print()
-print("Function:")
-print(this_function)
-print("Tokens:")
-print(l_tk_names[1])
+print(l_tk[1])
+#print("Literals:")
 print()
+print(l_tk[2])
