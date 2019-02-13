@@ -1,4 +1,4 @@
-#NLP armor
+# NLP armor
 
 Software can contain 0-Day or hidden vulnerabilities which may allow malicious actors to gain access to secure areas in server memory. Some of the recent mega-breaches can be traced back to such vulnerabilities. Static analyzers, although easy to use, miss up to 60% of hidden vulnerabilities. Dynamic analyzers have a better detection rate, but are much more time consuming and require experts to run.
 
