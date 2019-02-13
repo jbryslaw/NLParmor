@@ -28,22 +28,16 @@ _MAXLEN = 200 #max function length in number of tokens
 _MAXLEN = _MAXLEN
 FRAC_TEST=.2 #Fraction of data to set aside for testing
 TOKEN_UNIVERSE = 266 # Number of unique tokens
-N_epoch = 6
-#N_epoch = 2
+N_epoch = 300
 # there are 29 functions without vulnerabilites
 #    to every 2 vulnerable functions
-#class_weights = {0:29,1:2}
-#class_weights = {0:2,1:29}
-#class_weights = {0:2,1:50}
-#class_weights = {0:29,1:2}
 class_weights = {0:2,1:29}
 #################################
 
 #################################
 ### switches
-b_floss      = False#True #False #True #True #False
-b_plot       = False#True #False #True #False #True #False #True #False
-b_load_model_from_file = False #True #False # True #False #True #False #True#False#True#False #True #False #True #False #True #False
+b_plot       = False#True 
+b_load_model_from_file = False #True 
 # do a binary classification (yes/no vuln) or categorical classification
 b_binary     = True #False
 b_start_from_previous_model = True
@@ -52,29 +46,18 @@ b_save_model = True #False
 
 #################################
 ### training file
-# df_total  = pd.read_pickle("train0_rebalenced.plk")
-#df_total  = pd.read_pickle("all_rebalenced.plk")
-#df_total  = pd.read_pickle("all_but_test_rebalenced.plk")
-#df_total  = pd.read_pickle("all_but_test.plk")    # unbalanced
 df_total  = pd.read_pickle("all_train.plk")    # unbalanced
-#df_total  = df_total.iloc[210000:300000]
-#df_total  = pd.read_pickle("all_train_rebalanced.plk")    # balanced
-#df_total  = df_total.iloc[0:10000]
 df_balance = pd.read_pickle("all_train_rebalanced.plk")    # balanced
 df_balance  = df_balance.iloc[0:10000]
-#df_total  = df_total.iloc[0:10000]
-#df_test   = pd.read_pickle("test_rebalenced.plk") # balanced
 df_test   = pd.read_pickle("test_and_valid_rebalanced.plk")  # balanced
-# df_test   = pd.read_pickle("all_train.plk")  # balanced
-# df_test    = df_test.iloc[0:100000]
 b_use_separate_test_file = True #False #True #False#True#False #True
 #################################
+
 #################################
 ##### modelfiles
 model_in_json = 'model_rtest_e3.json'
 model_in_h5   = "model_rtest_e3.h5"
 #model_in_h5   = "checkpoints/w_01_0.74.hdf5"
-
 #################################
 
 ################################
@@ -153,60 +136,10 @@ else:
     test_X  = padded_tokens[-N_test:]
     test_y  = labels[-N_test:]
 
-# Focal Loss (1708.02002)
-def floss():
-    def Floss(truth,reco):
-        # g -> floss power, a --> class weighting
-        # g=0, a=0.5 should produce normal CE
-        gamma=0.
-        alpha=0.5
-        #alpha=0.25
-        clip = kb.epsilon()  #1e-1 #1e-12 #1e-9
-
-        pT0 = tf.where(tf.equal(truth, 0), reco, tf.ones_like(reco))
-        pT1 = tf.where(tf.equal(truth, 1), reco, tf.ones_like(reco))
-
-        pT1 =  kb.clip(pT1,clip,1-clip)
-        pT0 =  kb.clip(pT1,clip,1-clip)
-
-        loss = (-1)*kb.sum(alpha*kb.pow(1-pT1,gamma)*kb.log(pT1))
-        -(kb.sum((1-alpha)*kb.pow(pT0,gamma)*kb.log(1-pT0)) )
-        # loss = (-1)*kb.mean(a*kb.pow(1-pT1,g)*kb.log(pT1))-(kb.mean((1-a)*kb.pow(pT0,g)*kb.log(1-pT0)) )
-
-        return loss
-    return Floss
-
-# Define Recall to be used as a metric in the CNN:
-def REC(truth,reco):
-    truth = truth
-    reco  = reco
-
-    c_truth = kb.clip(truth,0.,1.)
-    c_reco  = kb.clip(reco,0.,1.)
-
-    #use round to get >0.5
-    TP = kb.sum(kb.round(c_truth*c_reco))
-    T  = kb.sum(kb.round(c_truth))
-
-    #make sure T isn't 0, and get recall:
-    T  = T + kb.epsilon()
-    recall = TP/T
-    #return kb.mean(kb.equal(truth, kb.round(reco)))
-    return recall
-
 # Train new model, or load from file
 if not b_load_model_from_file:
     model = NLP_model(b_binary, len(labels[0]), _MAXLEN, TOKEN_UNIVERSE, w_embed)
-    if b_floss:
-        #train with a few epochs of CE before trying floss
- #       model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['acc',REC])
-        #model.fit(train_X, train_y, epochs=3, batch_size=128, validation_data=(test_X, test_y),class_weight=class_weights)
-#        model.fit(bal_tokens, bal_labels, epochs=1, batch_size=128, validation_data=(test_X, test_y),class_weight=class_weights)
-
-        model.compile(loss=floss(),optimizer='SGD',metrics=['acc',REC])
-        #model.compile(loss=losses.focal(),optimizer='SGD',metrics=['acc',REC])
-    else:
-        model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['acc',REC])
+    model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['acc'])
         
     print(model.summary())
     #    plot_model(model, to_file='schematic.svg',show_layer_names=False)
@@ -215,7 +148,7 @@ if not b_load_model_from_file:
     if(b_start_from_previous_model):
         model.load_weights(model_in_h5)
 
-    ### ###add checkpoints
+    ###add checkpoints
     m_checkpoints   = ModelCheckpoint("checkpoints/w_{epoch:02d}_{val_acc:.2f}.hdf5",
                                       monitor='val_acc', verbose=1, save_best_only=True)
     
@@ -231,8 +164,6 @@ else:
     print(model.summary())
 
 l_cm_labels = [True,False]
-#l_cm_labels = [True,False]
-#l_cm_labels = [1,0]
     
 if b_binary:
     predict = model.predict(test_X)
@@ -240,12 +171,8 @@ if b_binary:
     y_1D_test = test_y[:,1] == 1
     
     a_FN = np.logical_and(np.logical_not(y_pred),y_1D_test)
-    #FP:    a_FN = np.logical_and(y_pred,np.logical_not(y_1D_test))
-    print(a_FN)
     
     cm = confusion_matrix(y_1D_test,y_pred,labels=l_cm_labels)
-    # if len(y_1D_test) != 0.:
-    #     cm = cm/len(y_1D_test)
     print(cm)
     df_test['FN'] = pd.DataFrame(a_FN)
     df_FN = df_test.loc[df_test.FN==True]
@@ -270,7 +197,6 @@ if b_binary:
     plt.ylabel('Number of sentences')
     plt.hist(t_FN, bins=40)
     plt.show()
-
     
     # calulate MCC
     #MCC = matthews_corrcoef(y_1D_test,y_pred)
@@ -280,7 +206,6 @@ if b_binary:
     FN = cm[0,1]
     
     MCC = ((TP*TN)-(FP*FN))/np.sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))
-    #MCC = (TP*TN)-(FP*FN)/(TP+FP)(TP+FN)(TN+FP)(TN+FN)
     print(" MCC: ",MCC)
 
     #calculate F1
@@ -318,48 +243,6 @@ else:
     print(" p: ",precision)
     recall    = cm[0,0] / (cm[0,0]+cm[1,0])
     print(" r: ",recall)
-
-
-def plot_cm(cm, classes,
-                          normalize=False,
-                          title='Confusion matrix',
-                          cmap=plt.cm.Blues):
-    if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        print("Normalized confusion matrix")
-    else:
-        print('Confusion matrix, without normalization')
-
-    print(cm)
-
-    plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
-    plt.colorbar()
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
-    plt.yticks(tick_marks, classes)
-
-    fmt = '.2f' if normalize else 'd'
-    thresh = cm.max() / 2.
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, format(cm[i, j], fmt),
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
-
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
-    plt.tight_layout()
-
-
-## ###plot cm
-if b_plot:
-    np.set_printoptions(precision=2)
-
-    plt.figure()
-    class_names = ['Vulnerable','Not Vulnerable']
-    plot_cm(cm, classes=class_names, normalize=True,
-                           title='Normalized confusion matrix')
-    plt.show()
 
 
 ##############################
