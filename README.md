@@ -7,4 +7,13 @@ NLP Armor, utilizes strategies from natural language processing to quickly and e
 [Slides](https://drive.google.com/open?id=1HGSWpMnimTQN8Xq9kPlOag85D1KDAqmqaD3IfkittSo)
 
 # Code Description
-1. here
+1. lex_utils.py:
+   Python package for tokenizing C++;
+2. read_to_lex.py:
+   Tests the tokenizer, taking C++ source files as input.
+3. NLParmor_train.py:
+   Trains the convolution neural network.
+4. NLParmor_model.py:
+   Keras implementation of a convultion neural network for learning source code embeddings.
+5. NLParmor_single.py:
+   Takes a single C++ source file as input. Uses the CNN weights trained by NLParmor_model.py, to predict the probability that the inputted file contains a known vulnerability.
