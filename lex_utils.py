@@ -241,7 +241,6 @@ def lex_func(this_function):
                 "var28":222,
                 "var29":223,
 
-
                 # string literals ( "/home/" )
                 "str0":234,
                 "str1":235,
@@ -283,10 +282,8 @@ def lex_func(this_function):
  #               '\'':265,
 #                '\\':266
                 }
-
     #comments:
     # \ not commonly used outside of strings ( just continues lines )
-
 
     ### END Dictionary of Special characters and keywords
     #####################################################
@@ -442,7 +439,6 @@ def lex_func(this_function):
                 pass
             continue;
 
-
         # END deal with strings
         ##############################
         
@@ -542,9 +538,7 @@ def lex_func(this_function):
         # check for numbers
         ##############################
 
-        ##need to check other digraphs and trigraphs
-
-        #IGNORE SEMICOLONS????
+        #IGNORE SEMICOLON
         if this_char == ";": continue            
 
         ##############################
@@ -558,20 +552,13 @@ def lex_func(this_function):
         #### END Tokenize special characters
         ##############################
 
-        #print(this_char)
-
-
-
-
-        # deal with &d, %d etc
-
-        # deal with __ __
-
     #while i_char < (len(this_function)-1):
 
     # return a list with the tokens and their identifiers
-
     return [l_tokens,l_names,l_literals,
             n_strings+1,n_int+1,n_float+1]
 #def lex_func(this_function):
+
+
+
 
