@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import matthews_corrcoef
 from sklearn.metrics import f1_score
-#import plot_confusion_matrix
 from NLParmor_model import NLP_model
 import itertools
 import losses
@@ -23,8 +22,6 @@ from plt_histogram import plt_histogram
 #################################
 ### Consts
 _MAXLEN = 200 #max function length in number of tokens
-#_MAXLEN = 100 #max function length in number of tokens
-#_MAXLEN = 400 #max function length in number of tokens 
 _MAXLEN = _MAXLEN
 FRAC_TEST=.2 #Fraction of data to set aside for testing
 TOKEN_UNIVERSE = 266 # Number of unique tokens
@@ -36,28 +33,26 @@ class_weights = {0:2,1:29}
 
 #################################
 ### switches
-b_plot       = False#True 
-b_load_model_from_file = False #True 
+b_plot       = False
+b_load_model_from_file = False
 # do a binary classification (yes/no vuln) or categorical classification
-b_binary     = True #False
+b_binary     = True
 b_start_from_previous_model = True
-b_save_model = True #False
+b_save_model = True
 #################################
 
 #################################
 ### training file
 df_total  = pd.read_pickle("all_train.plk")    # unbalanced
 df_balance = pd.read_pickle("all_train_rebalanced.plk")    # balanced
-df_balance  = df_balance.iloc[0:10000]
 df_test   = pd.read_pickle("test_and_valid_rebalanced.plk")  # balanced
-b_use_separate_test_file = True #False #True #False#True#False #True
+b_use_separate_test_file = True
 #################################
 
 #################################
-##### modelfiles
+##### model weight file names
 model_in_json = 'model_rtest_e3.json'
 model_in_h5   = "model_rtest_e3.h5"
-#model_in_h5   = "checkpoints/w_01_0.74.hdf5"
 #################################
 
 ################################
@@ -101,7 +96,6 @@ if b_use_separate_test_file:
 ###############################
 
 #convert df to arrays
-#df_total = df_total.iloc[0:1]
 padded_tokens = df_total[l_seq].values
 bal_tokens    = df_balance[l_seq].values
 l_label_col = ['CWE-119', 'CWE-120', 'CWE-469', 'CWE-476', 'CWE-other']
